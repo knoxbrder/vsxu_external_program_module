@@ -9,7 +9,7 @@ The rate the program is called is controlled by the integer max_times_per_sec.
 Install:
 ---
 
-    git clone git://github.com/vovoid/vsxu-module.git
+    git clone git://github.com/knoxbrder/vsxu_external_program_module.git
     cd vsxu-module
     mkdir build
     cd build
