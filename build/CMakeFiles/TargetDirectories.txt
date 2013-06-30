@@ -1,0 +1,2 @@
+/home/michael/Downloads/vsxu-module-master/build/CMakeFiles/uninstall.dir
+/home/michael/Downloads/vsxu-module-master/build/CMakeFiles/vsxu-module-master.dir
