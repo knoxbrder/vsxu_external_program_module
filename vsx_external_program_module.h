@@ -18,36 +18,40 @@
 * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
 */
 
-
 #include "vsx_math_3d.h"
 #include "vsx_param.h"
 #include "vsx_module.h"
+
+#include <sys/time.h>
+#include <unistd.h>
 
 class vsx_external_program_module : public vsx_module
 {
   vsx_module_param_string* param1;
   vsx_module_param_string* param2;
-  vsx_module_param_int* param3;
+  vsx_module_param_float* param3;
   vsx_module_param_float* param4;
   vsx_module_param_float* param5;
   vsx_module_param_float* param6;
-  vsx_module_param_string* result;
+
+  timeval current_time;
+  unsigned long last,current;
 
 public:
 
   void module_info(vsx_module_info* info)
   {
+    info->output = 1;
     info->identifier = "system;external_program";
     info->description = "Passes string_arg,float1,float2,float3 to an external_program at max_times_per_second.";
     info->in_param_spec =
         "external_program:string,"
         "string_arg:string,"
-        "max_times_per_sec:int,"
+        "max_times_per_sec:float,"
         "float1:float,"
         "float2:float,"
         "float3:float"
     ;
-    info->out_param_spec = "result:string";
     info->component_class = "system";
   }
 
@@ -55,34 +59,37 @@ public:
   {
     param1 = (vsx_module_param_string*)in_parameters.create(VSX_MODULE_PARAM_ID_STRING,"external_program");
     param2 = (vsx_module_param_string*)in_parameters.create(VSX_MODULE_PARAM_ID_STRING,"string_arg");
-    param3 = (vsx_module_param_int*)in_parameters.create(VSX_MODULE_PARAM_ID_INT,"max_times_per_sec");
+    param3 = (vsx_module_param_float*)in_parameters.create(VSX_MODULE_PARAM_ID_FLOAT,"max_times_per_sec");
     param4 = (vsx_module_param_float*)in_parameters.create(VSX_MODULE_PARAM_ID_FLOAT,"float1");
     param5 = (vsx_module_param_float*)in_parameters.create(VSX_MODULE_PARAM_ID_FLOAT,"float2");
     param6 = (vsx_module_param_float*)in_parameters.create(VSX_MODULE_PARAM_ID_FLOAT,"float3");
 
-    result = (vsx_module_param_string*)out_parameters.create(VSX_MODULE_PARAM_ID_STRING,"result");
-
+    gettimeofday(&current_time,NULL);
+    last = current_time.tv_sec*1000000+ current_time.tv_usec;
     param1->set("");
     param2->set("");
-    param3->set(1);
+    param3->set(10);
     param4->set(0);
     param5->set(0);
     param6->set(0);
-    result->set("none");
     loading_done = true;
   }
-
 
   void run()
   {
     static char exec_cmd[1000];
     const char *cmd;
     const char *sarg;
+
+    gettimeofday(&current_time,NULL);
+    current = current_time.tv_sec*1000000+ current_time.tv_usec;
+    if (current<last+1000000/(int)param3->get()) return;
+    last=current;
+
     cmd = param1->get().c_str();
     sarg = param2->get().c_str();
-    sprintf(exec_cmd,"%s %s %f %f %f",cmd,sarg,param4->get(),param5->get(),param6->get());
+    snprintf(exec_cmd,1000,"%s %s %f %f %f",cmd,sarg,param4->get(),param5->get(),param6->get());
     system(exec_cmd);
-    result->set("done");
   }
 
 };

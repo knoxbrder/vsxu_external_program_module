@@ -5,7 +5,7 @@ Sample Module For VSXu.
 
 All it does is take 1 string param and 3 float params for input and launches an external_program.
 It outputs a string result.
-The rate the program is called is controlled by the integer max_times_per_sec.
+The rate the program is called is controlled by the float max_times_per_sec.
 Install:
 ---
 
